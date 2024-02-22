@@ -88,8 +88,22 @@ def update_scores(username, update_score, file_names):
         for profile in updated_scores:
             json.dump(profile, write_profile)
             write_profile.write('\n')
-
-    if any(username in profile for profile in updated_scores):
-        return f'Scores updated successfully for {username}'
-    else:
-        return f'Username {username} not found or incorrect name/age'
+def leaderboard(file_name):
+    g = []
+    player_data = []
+    position = 1
+    with open(file_name + '.txt', "r") as file:
+        for line in file:
+            dict_data = json.loads(line)
+            player = list(dict_data.keys())[0]
+            highscore = int(dict_data[player]['highscore'])
+            recent = '  recentscore = ' + dict_data[player]['recentscore'] + '\n'
+            line = '-----------------------------\n'
+            player_data.append({'player': player, 'highscore': highscore, 'recent': recent})
+    sorted_players = sorted(player_data, key=lambda x: x['highscore'], reverse=True)
+    for player_data in sorted_players:
+        highscore = '  Highscore = ' + str(player_data['highscore'])
+        profile = str(position),' ',player_data['player'], highscore, player_data['recent'],line
+        g.append(''.join(profile))
+        position += 1
+    return ''.join(g)
