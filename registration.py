@@ -1,14 +1,10 @@
 import json
 import math
-def File_maker(File_name):
-    if '.txt' not in File_name:
-        with open(File_name+'.txt','a') as Built_file:
-            Built_file.write(json.dumps(''))
-    else:
-        with open(File_name,'a') as Built_file:
-            Built_file.write(json.dumps())
-
 def registry(username, password, firstname, lastname, age,file_name):
+    if '.txt' in file_name:
+        file_name1 = file_name
+    else:
+        file_name1 = file_name + '.txt'
     player_profile = {}
     made_profile = {}
     player_profile['password'] = password
@@ -19,7 +15,7 @@ def registry(username, password, firstname, lastname, age,file_name):
     player_profile['recentscore'] = '0'
     made_profile[username] = player_profile
 
-    with open(file_name+'.txt', 'r') as read_profile:
+    with open(file_name1, 'r') as read_profile:
         read_data = read_profile.readlines()
         if read_data:
             for line in read_data:
@@ -27,11 +23,15 @@ def registry(username, password, firstname, lastname, age,file_name):
                 if username in check_profile:
                     return f'This Username is already being used'
 
-    with open(file_name+'.txt', 'a') as write_profile:
+    with open(file_name1, 'a') as write_profile:
         write_profile.write(json.dumps(made_profile) + '\n')
 
 def login(username, password, file_name):
-    with open(file_name+'.txt', 'r') as read_profile:
+    if '.txt' in file_name:
+        file_name1 = file_name
+    else:
+        file_name1 = file_name + '.txt'
+    with open(file_name1, 'r') as read_profile:
         read_data = read_profile.readlines()
         if read_data:
             for line in read_data:
@@ -44,10 +44,13 @@ def login(username, password, file_name):
                             return f'Incorrect password for {username}'
         return f'Username {username} not found or there are no profiles'
 
-def change_pass(username, name1, name2, age, file_names):
+def change_pass(username, name1, name2, age, file_name):
     updated_profiles = []
-
-    with open(file_names + '.txt', 'r') as read_profilee:
+    if '.txt' in file_name:
+        file_name1 = file_name
+    else:
+        file_name1 = file_name + '.txt'
+    with open(file_name1, 'r') as read_profilee:
         for line in read_profilee:
             profile = json.loads(line)
             if username in profile:
@@ -56,7 +59,7 @@ def change_pass(username, name1, name2, age, file_names):
                     profile[username]['password'] = new_pass
             updated_profiles.append(profile)
 
-    with open(file_names + '.txt', 'w') as write_profile:
+    with open(file_name1, 'w') as write_profile:
         for profile in updated_profiles:
             json.dump(profile, write_profile)
             write_profile.write('\n')
@@ -65,15 +68,18 @@ def change_pass(username, name1, name2, age, file_names):
         return f'Password changed successfully for {username}'
     else:
         return f'Username {username} not found or incorrect name/age'
-def update_scores(username, update_score, file_names):
-
+def update_scores(username, update_score, file_name):
+    if '.txt' in file_name:
+        file_name1 = file_name
+    else:
+        file_name1 = file_name + '.txt'
     update_score = update_score.strip()
     l2 = float(update_score)
     updated_scores = []
 
-    with open(file_names + '.txt', 'r') as read_profile:
+    with open(file_name1, 'r') as read_profile:
         for line in read_profile:
-            if line.strip():  
+            if line.strip(): 
                 profile = json.loads(line)
                 if username in profile:
                     g4 = float(profile[username]['highscore'])
@@ -88,11 +94,20 @@ def update_scores(username, update_score, file_names):
         for profile in updated_scores:
             json.dump(profile, write_profile)
             write_profile.write('\n')
+
+    if any(username in profile for profile in updated_scores):
+        return f'Scores updated successfully for {username}'
+    else:
+        return f'Username {username} not found or incorrect name/age'
 def leaderboard(file_name):
+    if '.txt' in file_name:
+        file_name1 = file_name
+    else:
+        file_name1 = file_name + '.txt'
     g = []
     player_data = []
     position = 1
-    with open(file_name + '.txt', "r") as file:
+    with open(file_name1, "r") as file:
         for line in file:
             dict_data = json.loads(line)
             player = list(dict_data.keys())[0]
