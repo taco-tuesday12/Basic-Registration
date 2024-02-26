@@ -13,7 +13,7 @@ def registry(username, password, firstname, lastname, age,change_pass,file_name)
     player_profile['age'] = age
     player_profile['highscore'] = '0'
     player_profile['recentscore'] = '0'
-    player_profile['change pass'] = change_pass
+    player_profile['change code'] = change_pass
     made_profile[username] = player_profile
 
     with open(file_name1, 'r') as read_profile:
@@ -55,7 +55,7 @@ def change_pass(username,change_pass,new_pass,file_name):
         for line in read_profilee:
             profile = json.loads(line)
             if username in profile:
-                if change_pass == profile[username]['change pass']:
+                if change_pass == profile[username]['change code']:
                     profile[username]['password'] = new_pass
             updated_profiles.append(profile)
 
