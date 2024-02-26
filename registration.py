@@ -1,6 +1,6 @@
 import json
 import math
-def registry(username, password, firstname, lastname, age,file_name):
+def registry(username, password, firstname, lastname, age,change_pass,file_name):
     if '.txt' in file_name:
         file_name1 = file_name
     else:
@@ -13,6 +13,7 @@ def registry(username, password, firstname, lastname, age,file_name):
     player_profile['age'] = age
     player_profile['highscore'] = '0'
     player_profile['recentscore'] = '0'
+    player_profile['change pass'] = change_pass
     made_profile[username] = player_profile
 
     with open(file_name1, 'r') as read_profile:
@@ -44,7 +45,7 @@ def login(username, password, file_name):
                             return f'Incorrect password for {username}'
         return f'Username {username} not found or there are no profiles'
 
-def change_pass(username, name1, name2, age, file_name):
+def change_pass(username,change_pass,new_pass,file_name):
     updated_profiles = []
     if '.txt' in file_name:
         file_name1 = file_name
@@ -54,8 +55,7 @@ def change_pass(username, name1, name2, age, file_name):
         for line in read_profilee:
             profile = json.loads(line)
             if username in profile:
-                if name1 == profile[username]['first name'] and name2 == profile[username]['lastname'] and str(age) == profile[username]['age']:
-                    new_pass = input('Enter your new password: ')
+                if change_pass == profile[username]['change pass']:
                     profile[username]['password'] = new_pass
             updated_profiles.append(profile)
 
