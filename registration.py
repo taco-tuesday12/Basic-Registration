@@ -1,33 +1,33 @@
 import json
 import math
-def registry(username, password, firstname, lastname, age,change_pass,file_name):
+import random
+def registry(username, password, firstname, lastname, age,change_pass,shift,file_name):
     if '.txt' in file_name:
         file_name1 = file_name
     else:
         file_name1 = file_name + '.txt'
     player_profile = {}
     made_profile = {}
-    player_profile['password'] = password
-    player_profile['first name'] = firstname
-    player_profile['lastname'] = lastname
-    player_profile['age'] = age
+    player_profile['password'] = encrypt(password,shift)
+    player_profile['first name'] = encrypt(firstname,shift)
+    player_profile['lastname'] = encrypt(lastname,shift)
+    player_profile['age'] = encrypt(age,shift)
     player_profile['highscore'] = '0'
-    player_profile['recentscore'] = '0'
-    player_profile['change code'] = change_pass
-    made_profile[username] = player_profile
+    player_profile['changepass'] = encrypt(change_pass,shift)
+    made_profile[encrypt(username,shift)] = player_profile
 
     with open(file_name1, 'r') as read_profile:
         read_data = read_profile.readlines()
-        if read_data:
-            for line in read_data:
-                check_profile = json.loads(line)
-                if username in check_profile:
-                    return f'This Username is already being used'
-
+        if len(read_data )>0:
+            for lets in read_data:
+                profile1 = json.loads(lets)
+                for user1 in profile1:
+                    if decrypt(user1,shift) == username:
+                        return f"This Username is already being Used"
     with open(file_name1, 'a') as write_profile:
-        write_profile.write(json.dumps(made_profile) + '\n')
-
-def login(username, password, file_name):
+        write_profile.write(str(json.dumps(made_profile)) + '\n')
+        return f'Profile made'
+def login(username, password, shift,file_name):
     if '.txt' in file_name:
         file_name1 = file_name
     else:
@@ -37,15 +37,14 @@ def login(username, password, file_name):
         if read_data:
             for line in read_data:
                 profile = json.loads(line)
-                for user, data in profile.items():
-                    if user == username:
-                        if data['password'] == password:
+                for user in profile:
+                    if decrypt(user,shift) == username:
+                        if decrypt(profile[user]['password'],shift) == password:
                             return True
                         else:
                             return f'Incorrect password for {username}'
         return f'Username {username} not found or there are no profiles'
-
-def change_pass(username,change_pass,new_pass,file_name):
+def change_pass(username,new_pass,shift,file_name):
     updated_profiles = []
     if '.txt' in file_name:
         file_name1 = file_name
@@ -54,9 +53,9 @@ def change_pass(username,change_pass,new_pass,file_name):
     with open(file_name1, 'r') as read_profilee:
         for line in read_profilee:
             profile = json.loads(line)
-            if username in profile:
-                if change_pass == profile[username]['change code']:
-                    profile[username]['password'] = new_pass
+            username = encrypt(username,shift)
+            if username in profile: 
+                profile[username]['password'] = encrypt(new_pass,shift)
             updated_profiles.append(profile)
 
     with open(file_name1, 'w') as write_profile:
@@ -65,41 +64,34 @@ def change_pass(username,change_pass,new_pass,file_name):
             write_profile.write('\n')
 
     if any(username in profile for profile in updated_profiles):
+        username = decrypt(username,7)
         return f'Password changed successfully for {username}'
     else:
         return f'Username {username} not found or incorrect name/age'
-def update_scores(username, update_score, file_name):
+def update_scores(username, update_score,shift, file_name):
     if '.txt' in file_name:
         file_name1 = file_name
     else:
         file_name1 = file_name + '.txt'
-    update_score = update_score.strip()
-    l2 = float(update_score)
-    updated_scores = []
+    updated_profiles = []
+    with open(file_name1, 'r') as read_profilee:
+        for line in read_profilee:
+            profile = json.loads(line)
+            username = encrypt(username,shift)
+            if username in profile:
+                if profile[username]['highscore']<update_score:
+                    profile[username]['highscore'] = update_score
+                    profile[username]["recentscore"] = update_score
+                else:
+                    profile[username]["recentscore"] = update_score
+            updated_profiles.append(profile)
 
-    with open(file_name1, 'r') as read_profile:
-        for line in read_profile:
-            if line.strip(): 
-                profile = json.loads(line)
-                if username in profile:
-                    g4 = float(profile[username]['highscore'])
-                    if g4 < l2:
-                        profile[username]['highscore'] = update_score
-                        profile[username]['recentscore'] = update_score
-                    else:
-                        profile[username]['recentscore'] = update_score
-                updated_scores.append(profile)
-
-    with open(file_names + '.txt', 'w') as write_profile:
-        for profile in updated_scores:
+    with open(file_name1, 'w') as write_profile:
+        for profile in updated_profiles:
             json.dump(profile, write_profile)
             write_profile.write('\n')
-
-    if any(username in profile for profile in updated_scores):
-        return f'Scores updated successfully for {username}'
-    else:
-        return f'Username {username} not found or incorrect name/age'
-def leaderboard(file_name):
+   
+def leaderboard(file_name,shift):
     if '.txt' in file_name:
         file_name1 = file_name
     else:
@@ -111,8 +103,8 @@ def leaderboard(file_name):
         for line in file:
             dict_data = json.loads(line)
             player = list(dict_data.keys())[0]
-            highscore = int(dict_data[player]['highscore'])
-            recent = '  recentscore = ' + dict_data[player]['recentscore'] + '\n'
+            highscore = int(decrypt(dict_data[player]['highscore'],shift))
+            recent = '  recentscore = ' + decrypt(dict_data[player]['recentscore'],shift) + '\n'
             line = '-----------------------------\n'
             player_data.append({'player': player, 'highscore': highscore, 'recent': recent})
     sorted_players = sorted(player_data, key=lambda x: x['highscore'], reverse=True)
@@ -122,3 +114,18 @@ def leaderboard(file_name):
         g.append(''.join(profile))
         position += 1
     return ''.join(g)
+
+def encrypt(data, shift):
+    encrypted_text = ""
+    for char in data:
+        if char.isalpha():
+            shift_amount = shift % 26
+            if char.isupper():
+                encrypted_text =encrypted_text+ chr((ord(char) - 65 + shift_amount) % 26 + 65)
+            else:
+                encrypted_text =encrypted_text+ chr((ord(char) - 97 + shift_amount) % 26 + 97)
+        else:
+            encrypted_text += char
+    return encrypted_text
+def decrypt(code, shift):
+    return encrypt(code, -shift)
