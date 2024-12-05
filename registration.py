@@ -13,6 +13,7 @@ def registry(username, password, firstname, lastname, age,change_pass,shift,file
     player_profile['lastname'] = encrypt(lastname,shift)
     player_profile['age'] = encrypt(age,shift)
     player_profile['highscore'] = '0'
+    player_profile['recentscore'] = '0'
     player_profile['changepass'] = encrypt(change_pass,shift)
     made_profile[encrypt(username,shift)] = player_profile
 
